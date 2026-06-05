@@ -1,0 +1,25 @@
+{{- if .Values.serviceMonitor.enabled -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "deployment-platform.fullname" . }}
+  labels:
+    {{- include "deployment-platform.labels" . | nindent 4 }}
+    {{- if .Values.serviceMonitor.releaseLabel }}
+    release: {{ .Values.serviceMonitor.releaseLabel | quote }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "deployment-platform.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: application
+  endpoints:
+    - port: http
+      path: {{ .Values.app.metricsPath }}
+      interval: {{ .Values.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_phase]
+          action: keep
+          regex: Running
+{{- end }}

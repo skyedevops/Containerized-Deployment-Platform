@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: deployment-platform
+
+resources:
+  - ../../base/core
+  - ../../base/optional
+
+components:
+  - ../components/prod
+
+images:
+  - name: ghcr.io/CHANGE-ME/deployment-platform-app
+    newName: ghcr.io/CHANGE-ME/deployment-platform-app
+    newTag: "0.1.0"

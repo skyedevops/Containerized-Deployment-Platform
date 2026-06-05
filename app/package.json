@@ -1,0 +1,28 @@
+{
+  "name": "deployment-platform-app",
+  "version": "0.1.0",
+  "description": "Sample Node.js/Express service for the Containerized Deployment Platform.",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon --watch src src/server.js",
+    "lint": "eslint src tests",
+    "test": "node --test --test-reporter=spec tests/**/*.test.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.11.5",
+    "ioredis": "^5.4.1",
+    "pino": "^9.1.0",
+    "pino-http": "^10.1.0",
+    "prom-client": "^15.1.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.5.0",
+    "nodemon": "^3.1.4",
+    "supertest": "^7.0.0"
+  }
+}

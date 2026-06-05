@@ -1,0 +1,24 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deployment-platform-app
+  namespace: deployment-platform
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: deployment-platform-app
+  namespace: deployment-platform
+subjects:
+  - kind: ServiceAccount
+    name: deployment-platform-app
+    namespace: deployment-platform
+roleRef:
+  kind: Role
+  name: deployment-platform-app
+  apiGroup: rbac.authorization.k8s.io

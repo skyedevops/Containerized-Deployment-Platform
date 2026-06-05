@@ -1,0 +1,22 @@
+apiVersion: v2
+name: deployment-platform
+description: |
+  Containerized Deployment Platform - production-grade Helm chart for the
+  Node.js sample application with HPA, PDB, NetworkPolicy and ServiceMonitor
+  baked in. Optional in-chart PostgreSQL and Redis deployments are included
+  so the platform runs out-of-the-box on a fresh cluster.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - deployment-platform
+  - nodejs
+  - kubernetes
+  - postgresql
+  - redis
+home: https://github.com/CHANGE-ME/Containerized-Deployment-Platform
+sources:
+  - https://github.com/CHANGE-ME/Containerized-Deployment-Platform
+maintainers:
+  - name: Containerized Deployment Platform Contributors
+icon: https://raw.githubusercontent.com/cncf/artwork/master/projects/kubernetes/icon/color/kubernetes-icon-color.svg

@@ -1,0 +1,24 @@
+# Production overrides
+replicaCount: 3
+app:
+  env: production
+  logLevel: warn
+ingress:
+  hosts:
+    - host: app.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+autoscaling:
+  minReplicas: 3
+  maxReplicas: 20
+podDisruptionBudget:
+  minAvailable: 2
+postgresql:
+  primary:
+    persistence:
+      size: 50Gi
+    resources:
+      limits:
+        cpu: "2"
+        memory: 2Gi

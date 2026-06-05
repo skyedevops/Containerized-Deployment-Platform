@@ -1,0 +1,204 @@
+# Default values for the deployment-platform chart.
+# This is a YAML-formatted file. Override per environment with -f values-prod.yaml.
+
+# ----------------------------------------------------------------------------
+# Image / application
+# ----------------------------------------------------------------------------
+image:
+  repository: ghcr.io/CHANGE-ME/deployment-platform-app
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+imagePullSecrets: []
+
+replicaCount: 2
+
+app:
+  version: "0.1.0"
+  env: production
+  logLevel: info
+  port: 3000
+  metricsPath: /metrics
+
+# ----------------------------------------------------------------------------
+# Service / Ingress
+# ----------------------------------------------------------------------------
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+  annotations: {}
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: app.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - app.example.com
+      secretName: app-tls
+
+# ----------------------------------------------------------------------------
+# Resource limits / probes
+# ----------------------------------------------------------------------------
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+probes:
+  liveness:
+    path: /healthz
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  readiness:
+    path: /readyz
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+  startup:
+    path: /healthz
+    failureThreshold: 30
+    periodSeconds: 5
+
+# ----------------------------------------------------------------------------
+# Resilience: HPA + PDB + topology spread
+# ----------------------------------------------------------------------------
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  behavior: {}
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+topologySpreadConstraints:
+  enabled: true
+  maxSkew: 1
+  topologyKey: kubernetes.io/hostname
+  whenUnsatisfiable: ScheduleAnyway
+
+# ----------------------------------------------------------------------------
+# Security context (Pod + container)
+# ----------------------------------------------------------------------------
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+  automountServiceAccountToken: false
+
+rbac:
+  create: true
+  rules:
+    - apiGroups: [""]
+      resources: ["configmaps"]
+      verbs: ["get", "list", "watch"]
+
+# ----------------------------------------------------------------------------
+# Network policy
+# ----------------------------------------------------------------------------
+networkPolicy:
+  enabled: true
+  ingressNamespaceSelector:
+    matchLabels:
+      kubernetes.io/metadata.name: ingress-nginx
+
+# ----------------------------------------------------------------------------
+# Observability
+# ----------------------------------------------------------------------------
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+  releaseLabel: prometheus
+
+# ----------------------------------------------------------------------------
+# Application configuration
+# ----------------------------------------------------------------------------
+config:
+  postgres:
+    host: ""      # leave empty to use the in-chart postgres host
+    port: 5432
+    database: appdb
+    user: app
+    poolMax: 10
+    ssl: false
+  redis:
+    host: ""      # leave empty to use the in-chart redis host
+    port: 6379
+    db: 0
+    ttlSeconds: 300
+
+secrets:
+  # Only used when postgresql.enabled=false (no in-chart DB).
+  postgresPassword: "changeme"
+  redisPassword: ""
+
+# ----------------------------------------------------------------------------
+# In-chart PostgreSQL
+# ----------------------------------------------------------------------------
+postgresql:
+  enabled: true
+  # If you have an externally managed secret, set existingSecret to its name.
+  existingSecret: ""
+  password: "changeme"
+  image:
+    tag: "16-alpine"
+  persistence:
+    size: 8Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+# ----------------------------------------------------------------------------
+# In-chart Redis
+# ----------------------------------------------------------------------------
+redis:
+  enabled: true
+  image:
+    tag: "7-alpine"
+  password: ""
+  persistence:
+    size: 2Gi
+    storageClass: ""
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi

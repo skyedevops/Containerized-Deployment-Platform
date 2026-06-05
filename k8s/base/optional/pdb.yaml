@@ -1,0 +1,14 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: app
+  namespace: deployment-platform
+  labels:
+    app.kubernetes.io/name: deployment-platform-app
+    app.kubernetes.io/component: application
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: deployment-platform-app
+      app.kubernetes.io/component: application

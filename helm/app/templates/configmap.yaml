@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "deployment-platform.fullname" . }}
+  labels:
+    {{- include "deployment-platform.labels" . | nindent 4 }}
+data:
+  NODE_ENV: {{ .Values.app.env | quote }}
+  PORT: {{ .Values.app.port | quote }}
+  LOG_LEVEL: {{ .Values.app.logLevel | quote }}
+  APP_VERSION: {{ .Values.app.version | quote }}
+  POSTGRES_HOST: {{ include "deployment-platform.postgresHost" . | quote }}
+  POSTGRES_PORT: {{ .Values.config.postgres.port | quote }}
+  POSTGRES_DB: {{ .Values.config.postgres.database | quote }}
+  POSTGRES_USER: {{ .Values.config.postgres.user | quote }}
+  POSTGRES_POOL_MAX: {{ .Values.config.postgres.poolMax | quote }}
+  POSTGRES_SSL: {{ .Values.config.postgres.ssl | quote }}
+  REDIS_HOST: {{ include "deployment-platform.redisHost" . | quote }}
+  REDIS_PORT: {{ .Values.config.redis.port | quote }}
+  REDIS_DB: {{ .Values.config.redis.db | quote }}
+  REDIS_TTL_SECONDS: {{ .Values.config.redis.ttlSeconds | quote }}
+  METRICS_PATH: {{ .Values.app.metricsPath | quote }}

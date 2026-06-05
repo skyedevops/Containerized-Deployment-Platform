@@ -1,0 +1,15 @@
+# Dev overrides
+replicaCount: 1
+app:
+  env: development
+  logLevel: debug
+ingress:
+  enabled: false
+autoscaling:
+  enabled: false
+podDisruptionBudget:
+  enabled: false
+serviceMonitor:
+  enabled: false
+networkPolicy:
+  enabled: false

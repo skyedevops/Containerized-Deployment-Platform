@@ -1,0 +1,92 @@
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'   # Weekly on Monday
+
+permissions:
+  contents: read
+  packages: read
+  security-events: write
+
+jobs:
+  trivy-image:
+    name: Trivy image scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image (for scanning)
+        run: docker build -t dp-app:scan ./app
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: 'dp-app:scan'
+          format: 'sarif'
+          output: 'trivy-image.sarif'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-image.sarif
+
+  trivy-fs:
+    name: Trivy filesystem scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-fs.sarif'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-fs.sarif
+
+  kube-bench:
+    name: kube-bench (manifest sanity)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kustomize
+        run: |
+          curl -sLO "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64.tar.gz"
+          tar -xzf kustomize_v5.4.3_linux_amd64.tar.gz
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Render manifests
+        run: kustomize build k8s/overlays/prod > /tmp/manifests.yaml
+
+      - name: Install kube-bench (optional)
+        run: |
+          if command -v kube-bench &> /dev/null; then
+            kube-bench --version || true
+          else
+            echo "kube-bench not installed; skipping"
+          fi
+
+      - name: Conftest CIS checks
+        uses: instrumenta/conftest-action@main
+        with:
+          files: /tmp/manifests.yaml
+          policy: https://github.com/instrumenta/conftest/examples/kubernetes/policy
+          namespace: deployment-platform

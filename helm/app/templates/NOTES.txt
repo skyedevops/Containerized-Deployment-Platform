@@ -1,0 +1,41 @@
+{{- $svc := include "deployment-platform.fullname" . -}}
+Deployment Platform "{{ $svc }}" has been installed in namespace {{ .Release.Namespace }}.
+
+Service endpoint:
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+  https://{{ .host }}{{ (index .paths 0).path }}
+{{- end }}
+{{- else }}
+  kubectl port-forward svc/{{ $svc }} {{ .Values.service.port }}:{{ .Values.app.port }} -n {{ .Release.Namespace }}
+{{- end }}
+
+Health checks:
+  curl http://localhost:{{ .Values.app.port }}/healthz
+  curl http://localhost:{{ .Values.app.port }}/readyz
+
+Resources created:
+{{- if .Values.autoscaling.enabled }}
+  - HorizontalPodAutoscaler: {{ $svc }} ({{ .Values.autoscaling.minReplicas }}-{{ .Values.autoscaling.maxReplicas }} replicas)
+{{- end }}
+{{- if .Values.podDisruptionBudget.enabled }}
+  - PodDisruptionBudget:   {{ $svc }}
+{{- end }}
+{{- if .Values.serviceMonitor.enabled }}
+  - ServiceMonitor:        {{ $svc }}
+{{- end }}
+{{- if .Values.networkPolicy.enabled }}
+  - NetworkPolicy:         {{ $svc }}
+{{- end }}
+
+{{- if .Values.postgresql.enabled }}
+PostgreSQL:
+  Host:     {{ include "deployment-platform.postgresHost" . }}:{{ .Values.config.postgres.port }}
+  Database: {{ .Values.config.postgres.database }}
+  User:     {{ .Values.config.postgres.user }}
+{{- end }}
+
+{{- if .Values.redis.enabled }}
+Redis:
+  Host:     {{ include "deployment-platform.redisHost" . }}:{{ .Values.config.redis.port }}
+{{- end }}

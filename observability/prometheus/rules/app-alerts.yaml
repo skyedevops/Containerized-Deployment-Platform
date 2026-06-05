@@ -1,0 +1,47 @@
+groups:
+  - name: app.rules
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m])) by (route)
+            /
+          sum(rate(http_requests_total[5m])) by (route)
+            > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "5xx error rate > 5% on {{ $labels.route }}"
+          description: "5xx ratio is {{ $value | humanizePercentage }} for route {{ $labels.route }}."
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le, route) (rate(http_request_duration_seconds_bucket[5m]))
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "p95 latency > 500ms on {{ $labels.route }}"
+          description: "p95 = {{ $value }}s"
+
+      - alert: PodCrashLooping
+        expr: |
+          rate(kube_pod_container_status_restarts_total[15m]) > 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pod {{ $labels.pod }} crash-looping in {{ $labels.namespace }}"
+
+      - alert: AppDown
+        expr: up{job="app"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "App instance {{ $labels.instance }} is down"

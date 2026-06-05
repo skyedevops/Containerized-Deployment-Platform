@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: 'deployment-platform'
+    orgId: 1
+    folder: 'Deployment Platform'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

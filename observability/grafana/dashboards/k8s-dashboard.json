@@ -1,0 +1,45 @@
+{
+  "title": "Deployment Platform - Kubernetes",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Pod count",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "sum(kube_pod_status_phase{namespace=\"deployment-platform\"}) by (phase)", "legendFormat": "{{phase}}" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "CPU usage (cores)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"deployment-platform\"}[5m])) by (pod)", "legendFormat": "{{pod}}" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Memory usage (RSS)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "sum(container_memory_rss{namespace=\"deployment-platform\"}) by (pod)", "legendFormat": "{{pod}}" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Pod restarts",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"deployment-platform\"}[1h])) by (pod)", "legendFormat": "{{pod}}" }
+      ]
+    }
+  ]
+}
