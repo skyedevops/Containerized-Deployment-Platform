@@ -146,6 +146,8 @@ make clean        # remove local artifacts
 - [docs/security.md](docs/security.md) - threat model, hardening, RBAC
 - [docs/observability.md](docs/observability.md) - metrics, logs, alerts
 - [docs/troubleshooting.md](docs/troubleshooting.md) - common issues
+- [docs/video-script.md](docs/video-script.md) - ~17 min build-process video script
+- [docs/design-decisions.md](docs/design-decisions.md) - 20 design decisions with trade-offs
 
 ## CI/CD
 
