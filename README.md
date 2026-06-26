@@ -20,7 +20,7 @@ Scaling a containerized application is more than just running `kubectl apply`. I
 ### 🏗️ Architecture Overview
 The platform implements a layered approach to deployment, providing multiple paths for different environments (Dev, Staging, Prod).
 
-![K8s Architecture Diagram](assets/k8s-architecture.svg)
+![K8s Architecture Diagram](assets/k8s-architecture.png)
 
 ### 🎯 Key Engineering Decisions
 
